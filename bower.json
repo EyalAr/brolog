@@ -1,0 +1,20 @@
+{
+  "name": "brolog",
+  "version": "0.0.0",
+  "authors": [
+    "Eyal Arubas <eyalarubas@gmail.com>"
+  ],
+  "description": "A logging module",
+  "main": "main.js",
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
