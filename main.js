@@ -24,7 +24,7 @@ var LEVELS = [
     toString: {}
 });
 
-var gLevel = LEVELS.toNumber.INF,
+var gLevel = LEVELS.toNumber.OFF,
     gCounter = 0,
     lCounter = 0,
     gNameFilter,
