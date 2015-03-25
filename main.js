@@ -9,6 +9,8 @@ var ARRAY_SLICE = Array.prototype.slice,
     DEFAULT_PRINTER = console && console.log ? console.log.bind(console) : function(){},
     PRINTER = DEFAULT_PRINTER;
 
+var QUERY_PARAM_DIRECTIVE = 'brolog';
+
 var LEVELS = [
     'DBG',
     'INF',
@@ -29,6 +31,15 @@ var gLevel = LEVELS.toNumber.OFF,
     lCounter = 0,
     gNameFilter,
     gStart;
+
+if (window && window.location){
+    var qs = window.location.search || "",
+        re = new RegExp("[&\\?]" + QUERY_PARAM_DIRECTIVE + "=([^#&]*)"),
+        m = qs.match(re),
+        l;
+    if (m) l = LEVELS.toNumber[m[1].toUpperCase()];
+    if (l !== undefined) gLevel = l;
+}
 
 /**
  * Constructor
