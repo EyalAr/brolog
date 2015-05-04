@@ -6,8 +6,8 @@
 
 var ARRAY_SLICE = Array.prototype.slice,
     ARRAY_PUSH = Array.prototype.push,
-    DEFAULT_PRINTER = console && console.log ? console.log.bind(console) : function(){},
-    PRINTER = DEFAULT_PRINTER;
+    DEFAULT_PRINTER = getConsolePrinter(console),
+    PRINTERS = [ DEFAULT_PRINTER ];
 
 var QUERY_PARAM_DIRECTIVE = 'brolog';
 
@@ -66,19 +66,49 @@ function allow(logger, level){
     return true;
 }
 
+function getConsolePrinter(console){
+    var clog = console && console.log ? console.log.bind(console) : function(){},
+        cdbg = console && console.debug ? console.debug.bind(console): clog,
+        cwrn = console && console.warn ? console.warn.bind(console): clog,
+        cerr = console && console.error ? console.error.bind(console): clog;
+    return function(gCounter, gStart, logger, nLevel, sLevel, msgs){
+        var _msgs = [
+            "[" + gCounter + " " + (Date.now() - gStart) + "]",
+            "[" + logger.name + "]",
+            "[" + logger.counter + " " + (Date.now() - logger.start) + "]",
+            "[" + sLevel + "]"
+        ];
+        ARRAY_PUSH.apply(_msgs, msgs);
+        switch(sLevel){
+            case "DBG":
+                cdbg.apply(null, _msgs);
+                break;
+            case "INF":
+                clog.apply(null, _msgs);
+                break;
+            case "WRN":
+                cwrn.apply(null, _msgs);
+                break;
+            case "ERR":
+                cerr.apply(null, _msgs);
+                break;
+            default:
+                clog.apply(null, _msgs);
+                break;
+        }
+    };
+}
+
 function _print(logger, level, args){
     if (!allow(logger, level)) return;
     if (!gStart) gStart = Date.now();
     if (!logger.start) logger.start = Date.now();
+    gCounter++;
+    logger.counter++;
     args = ARRAY_SLICE.apply(args);
-    var msgs = [
-        "[" + (gCounter++) + " " + (Date.now() - gStart) + "]",
-        "[" + logger.name + "]",
-        "[" + (logger.counter++) + " " + (Date.now() - logger.start) + "]",
-        "[" + LEVELS.toString[level] + "]"
-    ];
-    ARRAY_PUSH.apply(msgs, args);
-    PRINTER.apply(null, msgs);
+    PRINTERS.forEach(function(printer){
+        printer(gCounter, gStart, logger, level, LEVELS.toString[level], args);
+    });
     return args.join(" ");
 }
 
@@ -146,10 +176,9 @@ Logger.filterName = function(filter){
     gNameFilter = filter;
 };
 
-Logger.setPrinter = function(printer){
-    if (!printer) PRINTER = DEFAULT_PRINTER;
-    else if (typeof(printer) !== 'function') throw Error("'printer' must be a function");
-    else PRINTER = printer;
+Logger.addPrinter = function(printer){
+    if (typeof(printer) !== 'function') throw Error("'printer' must be a function");
+    PRINTERS.push(printer);
 };
 
 return Logger;
