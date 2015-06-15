@@ -51,6 +51,10 @@ function Logger(name){
     this.level = LEVELS.toNumber.DBG;
     this.counter = 0;
     this.start = null;
+
+    // whatever is here will be sent as meta data to the log printers,
+    // *only* for the next log message, and then will be reset back to 'null'.
+    this.meta = null;
 }
 
 /**
@@ -71,7 +75,7 @@ function getConsolePrinter(console){
         cdbg = console && console.debug ? console.debug.bind(console): clog,
         cwrn = console && console.warn ? console.warn.bind(console): clog,
         cerr = console && console.error ? console.error.bind(console): clog;
-    return function(gCounter, gStart, logger, nLevel, sLevel, msgs){
+    return function(gCounter, gStart, logger, nLevel, sLevel, msgs, meta){
         var _msgs = [
             "[" + gCounter + " " + (Date.now() - gStart) + "]",
             "[" + logger.name + "]",
@@ -107,8 +111,9 @@ function _print(logger, level, args){
     logger.counter++;
     args = ARRAY_SLICE.apply(args);
     PRINTERS.forEach(function(printer){
-        printer(gCounter, gStart, logger, level, LEVELS.toString[level], args);
+        printer(gCounter, gStart, logger, level, LEVELS.toString[level], args, logger.meta);
     });
+    logger.meta = null;
     return args.join(" ");
 }
 
@@ -130,6 +135,11 @@ Logger.prototype.error = Logger.prototype.err = function(){
 
 Logger.prototype.off = function(){
     this.level = LEVELS.toNumber.OFF;
+};
+
+Logger.prototype.with = function(meta){
+    this.meta = meta;
+    return this;
 };
 
 Logger.prototype.setDebug = function(){
