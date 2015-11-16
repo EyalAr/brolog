@@ -41,6 +41,15 @@ if (window && window.location){
     if (l !== undefined) gLevel = l;
 }
 
+//http://stackoverflow.com/questions/5538972/console-log-apply-not-working-in-ie9
+if (Function.prototype.bind && window.console && typeof console.log == "object"){
+    [
+        "log","info","warn","error","assert","dir","clear","profile","profileEnd"
+    ].forEach(function (method) {
+        console[method] = this.bind(console[method], console);
+    }, Function.prototype.call);
+}
+
 /**
  * Constructor
  */
