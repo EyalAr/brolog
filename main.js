@@ -41,15 +41,6 @@ if (window && window.location){
     if (l !== undefined) gLevel = l;
 }
 
-//http://stackoverflow.com/questions/5538972/console-log-apply-not-working-in-ie9
-if (Function.prototype.bind && window.console && typeof console.log == "object"){
-    [
-        "log","info","warn","error","assert","dir","clear","profile","profileEnd"
-    ].forEach(function (method) {
-        console[method] = this.bind(console[method], console);
-    }, Function.prototype.call);
-}
-
 /**
  * Constructor
  */
@@ -80,10 +71,10 @@ function allow(logger, level){
 }
 
 function getConsolePrinter(console){
-    var clog = console && console.log ? console.log.bind(console) : function(){},
-        cdbg = console && console.debug ? console.debug.bind(console): clog,
-        cwrn = console && console.warn ? console.warn.bind(console): clog,
-        cerr = console && console.error ? console.error.bind(console): clog;
+    var clog = console && console.log ? getInterface('log') : function(){},
+        cdbg = console && console.debug ? getInterface('debug') : clog,
+        cwrn = console && console.warn ? getInterface('warn') : clog,
+        cerr = console && console.error ? getInterface('error') : clog;
     return function(gCounter, gStart, logger, nLevel, sLevel, msgs, meta){
         var _msgs = [
             "[" + gCounter + " " + (Date.now() - gStart) + "]",
@@ -110,6 +101,16 @@ function getConsolePrinter(console){
                 break;
         }
     };
+
+    function getInterface(method){
+        if (Function.prototype.bind && typeof console.log === "object") {
+            //IE9
+            return Function.prototype.call.bind(console[method], console);
+        } else {
+            //others
+            return console[method].bind(console);
+        }
+    }
 }
 
 function _print(logger, level, args){
