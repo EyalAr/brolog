@@ -103,7 +103,7 @@ function getConsolePrinter(console){
     };
 
     function getInterface(method){
-        if (Function.prototype.bind && typeof console.log === "object") {
+        if (Function.prototype.bind && typeof console[method] === "object") {
             //IE9
             return Function.prototype.call.bind(console[method], console);
         } else {
