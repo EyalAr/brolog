@@ -6,7 +6,7 @@
 
 var ARRAY_SLICE = Array.prototype.slice,
     ARRAY_PUSH = Array.prototype.push,
-    DEFAULT_PRINTER = getConsolePrinter(console),
+    DEFAULT_PRINTER = getConsolePrinter(window.console),
     PRINTERS = [ DEFAULT_PRINTER ];
 
 var QUERY_PARAM_DIRECTIVE = 'brolog';
